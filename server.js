@@ -5,7 +5,12 @@ const port = process.env.PORT || 8080;
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'dist')));
-app.get('/*', function(req, res) {
+
+app.get('/dist/bundle.js', function(req, res) {
+  res.sendFile(path.join(__dirname, 'dist', 'bundle.js'));
+});
+
+app.get('*', function(req, res) {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
