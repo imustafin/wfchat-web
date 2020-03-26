@@ -2,6 +2,7 @@ import React from 'react';
 import { hot } from 'react-hot-loader';
 
 import LoginForm from './LoginForm';
+import Chat from './Chat';
 
 import { auth } from './firebase';
 
@@ -43,6 +44,7 @@ class App extends React.Component {
     return (
       <div>
         <h1>Hi, {auth().currentUser.email}</h1>
+        <Chat />
       </div>
     );
   }
