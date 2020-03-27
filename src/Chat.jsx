@@ -1,6 +1,68 @@
 import React from 'react';
 import { auth, db } from './firebase';
 
+class ChatMessages extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      messages: []
+    };
+
+    this.getRef = this.getRef.bind(this);
+  }
+
+  getRef(roomId) {
+    return db.ref('chats/' + roomId);
+  }
+
+  subscribe(roomId) {
+    try {
+      this.getRef(roomId).on('value', snapshot => {
+        const kv = snapshot.val();
+        const messages = Object
+              .entries(kv)
+              .map(([k, v]) => ({ ...v, key: k }));
+        this.setState({ messages });
+      });
+    } catch(e) {
+      console.log(e);
+    }
+  }
+
+  unsubscribe(roomId) {
+    this.getRef(roomId).off();
+  }
+
+  async componentDidMount() {
+    this.subscribe(this.props.roomId);
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (prevProps.roomId != this.props.roomId) {
+      this.unsubscribe(prevProps.roomId);
+
+      this.setState({ messages: [] });
+      this.subscribe(this.props.roomId);
+    }
+  }
+
+  async componentWillUnmount() {
+    db.ref('chats').off();
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>Showing messages for room {this.props.roomId}</h2>
+        {this.state.messages.slice(0).reverse().map(message => (
+          <p key={message.key}>{message.content}</p>
+        ))}
+      </div>
+    );
+  }
+}
+
 class Chat extends React.Component {
   constructor(props) {
     super(props);
@@ -10,24 +72,9 @@ class Chat extends React.Component {
       chats: [],
       content: '',
       readError: null,
-      writeError: null
+      writeError: null,
+      room: '1',
     };
-  }
-
-  async componentDidMount() {
-    this.setState({ readError: null });
-
-    try {
-      db.ref('chats').on('value', snapshot => {
-        const kv = snapshot.val();
-        const chats = Object
-              .entries(kv)
-              .map(([k, v]) => ({ ...v, key: k }));
-        this.setState({ chats });
-      });
-    } catch(e) {
-      this.setState({ readError: e.message });
-    }
   }
 
   async handleSubmit(event) {
@@ -36,7 +83,7 @@ class Chat extends React.Component {
     this.setState({ writeError: null });
     try {
       this.setState({ sending: true });
-      await db.ref('chats').push({
+      await db.ref('chats/' + this.state.room).push({
         content: this.state.content,
         timestamp: Date.now(),
         uid: this.state.user.uid
@@ -57,13 +104,18 @@ class Chat extends React.Component {
           />
           {this.state.sending && <p>Sending...</p>}
           {this.state.error && <p>Write: {this.state.writeError}</p>}
+
+          <select
+            value={this.state.room}
+            onChange={e => this.setState({ room: e.target.value })}>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+
         </form>
-        {this.state.readError && <p>Read: {this.state.readError}</p>}
-        <div className={'chats'}>
-          {this.state.chats.slice(0).reverse().map(chat => (
-            <p key={chat.key}>{chat.content}</p>
-          ))}
-        </div>
+        <ChatMessages
+          roomId={this.state.room} />
       </div>
     );
   }
