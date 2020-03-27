@@ -33,14 +33,14 @@ module.exports = {
     filename: 'bundle.js'
   },
   devServer: {
-    contentBase: path.join(__dirname, 'public/'),
+    contentBase: path.join(__dirname, 'dist/'),
     port: 3000,
     publicPath: 'http://localhost:3000/dist/',
     hotOnly: true
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'src/index.html'
+      template: './src/index.html'
     }),
     new webpack.HotModuleReplacementPlugin()
   ]
