@@ -62,14 +62,26 @@ class ChatMessages extends React.Component {
               <div
                 className={message.uid === this.props.userUid ? "message my-message" : "message"}
                 key={message.key}>
-                <div className="message__text">
-                  <div className="message__text__content">
-                    {message.content}
+                {
+                  message.image ?
+                    <div className="message__image">
+                      <img
+                        className="message__image__content"
+                        src={message.image}/>
+                      <div className="message__time">
+                        {message.uid}
+                      </div>
+                    </div>
+                  :
+                  <div className="message__text">
+                    <div className="message__text__content">
+                      {message.content}
+                    </div>
+                    <div className="message__time">
+                      {message.uid}
+                    </div>
                   </div>
-                  <div className="message__time">
-                    {message.uid}
-                  </div>
-                </div>
+                }
               </div>
             ))}
           </div>
