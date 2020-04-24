@@ -59,7 +59,7 @@ class ChatMessages extends React.Component {
           <div className="messages">
             {this.state.messages.slice(0).reverse().map(message => (
               <div
-                className={message.uid.length > 5 ? "message my-message" : "message"}
+                className={message.uid === this.props.userUid ? "message my-message" : "message"}
                 key={message.key}>
                 <div className="message__text">
                   <div className="message__text__content">
@@ -129,7 +129,8 @@ class Chat extends React.Component {
 
         </form>
         <ChatMessages
-          roomId={this.state.room} />
+          roomId={this.state.room}
+          userUid={this.state.user.uid} />
       </div>
     );
   }
