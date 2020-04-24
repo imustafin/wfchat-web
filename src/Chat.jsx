@@ -1,5 +1,6 @@
 import React from 'react';
-import { auth, db } from './firebase';
+import { auth, db, storage } from './firebase';
+import { v4 as uuidv4 } from 'uuid';
 
 class ChatMessages extends React.Component {
   constructor(props) {
@@ -95,11 +96,16 @@ class Chat extends React.Component {
   async handleSubmit(event) {
     event.preventDefault();
 
+    this.sendMessage(this.state.content, null);
+  }
+
+  async sendMessage(text, image) {
     this.setState({ writeError: null });
     try {
       this.setState({ sending: true });
       await db.ref('chats/' + this.state.room).push({
-        content: this.state.content,
+        content: text,
+        image: image,
         timestamp: Date.now(),
         uid: this.state.user.uid
       });
@@ -107,6 +113,19 @@ class Chat extends React.Component {
     } catch(e) {
       this.setState({ writeError: e.message });
     }
+  }
+
+  fileUpload(e) {
+    const file = e.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    storage.ref('/images/' + uuidv4())
+      .put(file)
+      .then(snapshot => snapshot.ref.getDownloadURL()
+            .then(url => this.sendMessage(url, url)));
   }
 
   render() {
@@ -126,6 +145,10 @@ class Chat extends React.Component {
             <option value="2">2</option>
             <option value="3">3</option>
           </select>
+
+          <input
+            type="file"
+            onChange={e => this.fileUpload(e)}/>
 
         </form>
         <ChatMessages
