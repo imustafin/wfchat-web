@@ -6,6 +6,8 @@ import Chat from './Chat';
 
 import { auth } from './firebase';
 
+import './chat.css';
+
 class App extends React.Component {
   constructor(props) {
     super(props);

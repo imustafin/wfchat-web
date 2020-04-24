@@ -53,12 +53,27 @@ class ChatMessages extends React.Component {
 
   render() {
     return (
-      <div>
+      <>
         <h2>Showing messages for room {this.props.roomId}</h2>
-        {this.state.messages.slice(0).reverse().map(message => (
-          <p key={message.key}>{message.content}</p>
-        ))}
-      </div>
+        <section className="chat__body">
+          <div className="messages">
+            {this.state.messages.slice(0).reverse().map(message => (
+              <div
+                className={message.uid.length > 5 ? "message my-message" : "message"}
+                key={message.key}>
+                <div className="message__text">
+                  <div className="message__text__content">
+                    {message.content}
+                  </div>
+                  <div className="message__time">
+                    {message.uid}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </>
     );
   }
 }
@@ -102,7 +117,6 @@ class Chat extends React.Component {
             onChange={e => this.setState({ content: e.target.value })}
             value={this.state.content}
           />
-          {this.state.sending && <p>Sending...</p>}
           {this.state.error && <p>Write: {this.state.writeError}</p>}
 
           <select
