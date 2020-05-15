@@ -44,10 +44,7 @@ class App extends React.Component {
     }
 
     return (
-      <div>
-        <h1>Hi, {auth().currentUser.email}</h1>
-        <Chat />
-      </div>
+      <Chat />
     );
   }
 }

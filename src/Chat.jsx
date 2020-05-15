@@ -1,95 +1,8 @@
 import React from 'react';
 import { auth, db, storage } from './firebase';
 import { v4 as uuidv4 } from 'uuid';
+import ChatMessages from './ChatMessages';
 
-class ChatMessages extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      messages: []
-    };
-
-    this.getRef = this.getRef.bind(this);
-  }
-
-  getRef(roomId) {
-    return db.ref('chats/' + roomId);
-  }
-
-  subscribe(roomId) {
-    try {
-      this.getRef(roomId).on('value', snapshot => {
-        const kv = snapshot.val();
-        const messages = Object
-              .entries(kv)
-              .map(([k, v]) => ({ ...v, key: k }));
-        this.setState({ messages });
-      });
-    } catch(e) {
-      console.log(e);
-    }
-  }
-
-  unsubscribe(roomId) {
-    this.getRef(roomId).off();
-  }
-
-  async componentDidMount() {
-    this.subscribe(this.props.roomId);
-  }
-
-  async componentDidUpdate(prevProps) {
-    if (prevProps.roomId != this.props.roomId) {
-      this.unsubscribe(prevProps.roomId);
-
-      this.setState({ messages: [] });
-      this.subscribe(this.props.roomId);
-    }
-  }
-
-  async componentWillUnmount() {
-    db.ref('chats').off();
-  }
-
-  render() {
-    return (
-      <>
-        <h2>Showing messages for room {this.props.roomId}</h2>
-        <section className="chat__body">
-          <div className="messages">
-            {this.state.messages.slice(0).reverse().map(message => (
-              <div
-                className={message.uid === this.props.userUid ? "message my-message" : "message"}
-                key={message.key}>
-                {
-                  message.image ?
-                    <div className="message__image">
-                      <img
-                        className="message__image__content"
-                        src={message.image}/>
-                      <div className="message__time">
-                        {message.uid}
-                      </div>
-                    </div>
-                  :
-                  <div className="message__text">
-                    <div className="message__text__content">
-                      {message.content}
-                    </div>
-                    <div className="message__time">
-                      {message.uid}
-                    </div>
-                  </div>
-                }
-              </div>
-            ))}
-          </div>
-        </section>
-      </>
-    );
-  }
-}
 
 class Chat extends React.Component {
   constructor(props) {
@@ -137,39 +50,88 @@ class Chat extends React.Component {
     storage.ref('/images/' + uuidv4())
       .put(file)
       .then(snapshot => snapshot.ref.getDownloadURL()
-            .then(url => this.sendMessage(url, url)));
+      .then(url => this.sendMessage(url, url)));
   }
 
   render() {
+    const chats = [1, 2, 3];
+
     return (
-      <div>
-        <form onSubmit={e => this.handleSubmit(e)}>
-          <input
-            onChange={e => this.setState({ content: e.target.value })}
-            value={this.state.content}
-          />
-          {this.state.error && <p>Write: {this.state.writeError}</p>}
+      <section className={'mainApp'}>
+        <div className={'leftPanel'}>
+          <div className={'chats'}>
+          {chats.map(x => (
+            <div
+              className={'chatButton'}
+              onClick={() => this.setState({ room: x })}
+            >
+              <div className={'chatInfo'}>
+                
+              </div>
 
-          <select
-            value={this.state.room}
-            onChange={e => this.setState({ room: e.target.value })}>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
+              <p className={'name'}>
+                {x}
+              </p>
 
-          <input
-            type="file"
-            onChange={e => this.fileUpload(e)}/>
+              <p className={'message'}>
+                last message
+              </p>
+            </div>
+          ))}
+          </div>
+        </div>
+        <div className={'rightPanel'}>
+          <div className={'topBar'}>
+            <div className={'rightSide'}>
+              
+            </div>
+            <div className={'leftSide'}>
+              <p className={'chatName'}>
+                {this.state.room}
+                <span>{this.state.room}</span>
+              </p>
+              <p className={'chatStatus'}>
+                
+              </p>
+            </div>
+          </div>
+          <ChatMessages
+            roomId={this.state.room}
+            userUid={this.state.user.uid} />
+          <div className={'replyBar'}>
+            <input
+              style={{
+                width: '1px',
+                height: '1px',
+                opacity: 0,
+                overflow: 'hidden',
+                position: 'absolute',
+                zIndex: -1
+              }}
+              id={'file'}
+              type="file"
+              onChange={e => this.fileUpload(e)}/>
+            <label for={'file'} className={'attach'}>
+              <span className={'material-icons d45'}>
+                attach_file
+              </span>
+            </label>
+            <form onSubmit={e => this.handleSubmit(e)}>
+              <input
+                type={'text'}
+                className={'replyMessage'}
+                placeholder={'Type your message...'}
+                onChange={e => this.setState({ content: e.target.value })}
+                value={this.state.content}
+              />
 
-        </form>
-        <ChatMessages
-          roomId={this.state.room}
-          userUid={this.state.user.uid} />
-      </div>
+
+            </form>
+          </div>
+        </div>
+      </section>
     );
   }
-  
 }
 
 export default Chat;
