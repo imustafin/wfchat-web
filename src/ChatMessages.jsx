@@ -1,5 +1,6 @@
 import React from 'react';
 import { auth, db, storage } from './firebase';
+import ScrollToBottom from 'react-scroll-to-bottom';
 
 class ChatMessages extends React.Component {
   constructor(props) {
@@ -53,7 +54,7 @@ class ChatMessages extends React.Component {
 
   render() {
     return (
-      <div className="convHistory userBg">
+      <ScrollToBottom className="convHistory userBg">
         {this.state.messages.map(message => (
           <div
             className={message.uid === this.props.userUid ? "msg messageSent" : "msg messageReceived"}
@@ -78,7 +79,7 @@ class ChatMessages extends React.Component {
             }
           </div>
         ))}
-      </div>
+      </ScrollToBottom>
     );
   }
 }
