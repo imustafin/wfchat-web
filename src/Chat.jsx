@@ -2,7 +2,7 @@ import React from 'react';
 import { auth, db, storage } from './firebase';
 import { v4 as uuidv4 } from 'uuid';
 import ChatMessages from './ChatMessages';
-import RoomButton from './RoomButton';
+import Rooms from './Rooms';
 
 
 class Chat extends React.Component {
@@ -55,18 +55,14 @@ class Chat extends React.Component {
   }
 
   render() {
-    const chats = ['1', '2', '3'];
-
     return (
       <section className={'mainApp'}>
         <div className={'leftPanel'}>
           <div className={'chats'}>
-            {chats.map(x => (
-              <RoomButton
-                onClick={() => this.setState({ room: x })}
-                active={this.state.room === x}
-                roomId={x}/>
-            ))}
+            <Rooms
+              roomSelected={x => this.setState({room: x})}
+              selectedRoom={this.state.room}
+            />
           </div>
         </div>
         <div className={'rightPanel'}>
