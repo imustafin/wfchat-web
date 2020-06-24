@@ -25,6 +25,7 @@ class ChatMessages extends React.Component {
               .entries(kv)
               .map(([k, v]) => ({ ...v, key: k }));
         this.setState({ messages });
+
       });
     } catch(e) {
       console.log(e);
@@ -32,7 +33,7 @@ class ChatMessages extends React.Component {
   }
 
   unsubscribe(roomId) {
-    this.getRef(roomId).off();
+    // this.getRef(roomId).off();
   }
 
   async componentDidMount() {
@@ -49,13 +50,17 @@ class ChatMessages extends React.Component {
   }
 
   async componentWillUnmount() {
-    db.ref('chats').off();
+    // db.ref('chats').off();
   }
 
   render() {
+    const { messages } = this.state;
+    if (messages.length > 0) {
+      db.ref('lastRead/' + this.props.roomId).set(messages[messages.length - 1].key);
+    }
     return (
       <ScrollToBottom className="convHistory userBg">
-        {this.state.messages.map(message => (
+        {messages.map(message => (
           <div
             className={message.uid === this.props.userUid ? "msg messageSent" : "msg messageReceived"}
             key={message.key}>

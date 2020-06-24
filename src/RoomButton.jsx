@@ -6,73 +6,79 @@ class RoomButton extends React.Component {
     super(props);
 
     this.state = {
-      lastMessage: null
+      messages: [],
     };
   }
 
   subscribe = () => {
-    if (this.ref) {
-      this.unsubscribe();
-    }
+    db.ref('lastRead/' + this.props.roomId).on('value', snapshot => {
+      this.setState({lastRead: snapshot.val()});
+    });
 
-    this.ref = db.ref('chats/' + this.props.roomId);
-
-    this.ref.on('value', snapshot => {
+    db.ref('chats/' + this.props.roomId).on('value', snapshot => {
       const kv = snapshot.val();
       const messages = Object
         .entries(kv)
         .map(([k, v]) => ({ ...v, key: k }));
 
-      const lastMessage = messages.length === 0 ? null : messages[messages.length - 1];
-
-      if (!lastMessage) {
-        this.setState({ lastMessage: 'No messages' });
-      } else {
-        const msg = lastMessage.content || (lastMessage.image ? 'Image' : null) || 'message';
-
-        const n = 30;
-        const short = msg.length > (n + 3) ? msg.slice(0, n) + '...' : msg;
-
-        this.setState({ lastMessage: short });
-      }
+      console.log(this.props.roomId, messages);
+      this.setState({ messages: messages });
     });
   }
 
-  unsubscribe = () => {
-    if (ref) {
-      ref.off();
+  renderLastMessage() {
+    const { messages } = this.state;
+    const lastMessage = messages.length === 0 ? null : messages[messages.length - 1];
+
+    if (!lastMessage) {
+      return 'No messages';
     }
+
+    const msg = lastMessage.content || (lastMessage.image ? 'Image' : null) || 'message';
+
+    const n = 30;
+    const short = msg.length > (n + 3) ? msg.slice(0, n) + '...' : msg;
+
+    return short;
   }
 
-  ref = null;
+
+  unsubscribe = () => {
+    if (ref) {
+      // ref.off();
+    }
+  }
 
   componentDidMount() {
     this.subscribe();
   }
 
-  async componentWillUnmount() {
-    this.unsubscribe();
-  }
-
   render() {
     const className ='chatButton' + (this.props.active ? ' active' : '');
+
+    const unreadReal = this.state.messages.filter(x => x.key > this.state.lastRead).length;
+
+    const unread = (unreadReal && unreadReal > 0 && unreadReal) || false;
 
     return (
       <div
       className={className}
       onClick={this.props.onClick} >
         <div className={'chatInfo'}>
-          <div className={'image'}>
-
-          </div>
+          <div className={'image'}></div>
 
           <p className={'name'}>
             User {this.props.roomId}
           </p>
 
           <p className={'message'}>
-            {this.state.lastMessage}
+            {this.renderLastMessage()}
           </p>
+        </div>
+
+        <div className={'status normal'}>
+          {unread && <p className={'count'}>{unread}</p>}
+
         </div>
       </div>
     );
