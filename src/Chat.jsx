@@ -23,6 +23,7 @@ class Chat extends React.Component {
     event.preventDefault();
 
     this.sendMessage(this.state.content, null);
+    this.setState({content: ''});
   }
 
   async sendMessage(text, image) {
@@ -96,7 +97,7 @@ class Chat extends React.Component {
               id={'file'}
               type="file"
               onChange={e => this.fileUpload(e)}/>
-            <label for={'file'} className={'attach'}>
+            <label htmlFor={'file'} className={'attach'}>
               <span className={'material-icons d45'}>
                 attach_file
               </span>
